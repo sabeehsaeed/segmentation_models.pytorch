@@ -1,5 +1,6 @@
 import torch
 from . import initialization as init
+from scipy import spatial
 
 
 class SegmentationModel(torch.nn.Module):
@@ -21,12 +22,21 @@ class SegmentationModel(torch.nn.Module):
                 f"divisible by {output_stride}. Consider pad your images to shape ({new_h}, {new_w})."
             )
 
+    def load_clusters(self, x):
+        self.clusters = x
+
+    def get_clusters(self):
+        return self.clusters
+
     def forward(self, x):
         """Sequentially pass `x` trough model`s encoder, decoder and heads"""
 
         self.check_input_shape(x)
 
+
+
         features = self.encoder(x)
+
         decoder_output = self.decoder(*features)
 
         masks = self.segmentation_head(decoder_output)
